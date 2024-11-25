@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background: #000;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 400;
+
+        const bgImage = new Image();
+        const snakeImage = new Image();
+        const foodImage = new Image();
+        bgImage.src = 'background.jpg'; // Add your background image
+        snakeImage.src = 'snake.png'; // Add your snake body image
+        foodImage.src = 'food.png'; // Add your food image
+
+        const eatSound = new Audio('eat.mp3'); // Sound when eating food
+        const gameOverSound = new Audio('gameover.mp3'); // Sound on game over
+
+        let snake = [{x: 200, y: 200}];
+        let direction = {x: 0, y: 0};
+        let food = {x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20};
+
+        function gameLoop() {
+            const head = {...snake[0]};
+            head.x += direction.x * 20;
+            head.y += direction.y * 20;
+
+            if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height || 
+                snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                gameOverSound.play();
+                return alert('Game Over!');
+            }
+
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                eatSound.play();
+                food = {x: Math.floor(Math.random() * 20) * 20, y: Math.floor(Math.random() * 20) * 20};
+            } else {
+                snake.pop();
+            }
+
+            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height); // Background
+            snake.forEach(segment => ctx.drawImage(snakeImage, segment.x, segment.y, 20, 20)); // Snake
+            ctx.drawImage(foodImage, food.x, food.y, 20, 20); // Food
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp' && direction.y === 0) direction = {x: 0, y: -1};
+            if (e.key === 'ArrowDown' && direction.y === 0) direction = {x: 0, y: 1};
+            if (e.key === 'ArrowLeft' && direction.x === 0) direction = {x: -1, y: 0};
+            if (e.key === 'ArrowRight' && direction.x === 0) direction = {x: 1, y: 0};
+        });
+
+        setInterval(gameLoop, 100);
+    </script>
+</body>
+</html>
